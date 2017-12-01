@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "module": "es2015",
+        "target": "es5",
+        "noImplicitAny": true,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "sourceMap": true,
+        "typeRoots" : ["../node_modules/@types"],
+        "types": [
+          "node",
+          "typescript"
+        ]
+    },
+    "files": [
+      "src/app.ts"
+    ],
+    "atom": {
+      "rewriteTsconfig": false
+    },
+    "compileOnSave": false
+}

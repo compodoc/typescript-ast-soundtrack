@@ -1,0 +1,39 @@
+{
+  "name": "typescript-ast-soundtrack",
+  "version": "0.0.0",
+  "description": "",
+  "scripts": {
+    "compile": "node_modules/.bin/rollup -c rollup.config.js",
+    "copy": "node_modules/.bin/cpx 'src/**/*.{html,css,js}' 'build/'",
+    "preserve": "rimraf build && npm run copy",
+    "serve": "node_modules/.bin/live-server ./build --no-browser --mount=/node_modules:./node_modules",
+    "watch": "nodemon --watch src -e ts --exec \"npm run compile\"",
+    "start": "npm-run-all -p serve watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/compodoc/typescript-ast-soundtrack.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/lodash-es": "^4.14.5",
+    "@types/node": "7.0.21",
+    "babel-preset-es2015-rollup": "^3.0.0",
+    "cpx": "^1.5.0",
+    "live-server": "^1.2.0",
+    "lodash-es": "^4.17.4",
+    "nodemon": "^1.11.0",
+    "npm-run-all": "^4.0.2",
+    "rimraf": "^2.6.1",
+    "rollup": "^0.41.6",
+    "rollup-plugin-babel": "^2.7.1",
+    "rollup-plugin-commonjs": "^8.2.6",
+    "rollup-plugin-node-resolve": "^3.0.0",
+    "rollup-plugin-typescript": "^0.8.1",
+    "typescript": "^2.6.2"
+  },
+  "dependencies": {
+    "monaco-editor": "^0.10.1"
+  }
+}
