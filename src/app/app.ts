@@ -28,9 +28,34 @@ export class TodoComponent {
         theme: 'vs-dark'
     });
 
+    let syntaxKindToNote = (kind: number) => {
+        let result;
+        switch(kind) {
+            case 229:
+            case 265:
+              result = 'C4';
+              break;
+            case 238:
+              result = 'D4';
+              break;
+            case 1:
+              result = 'B4';
+              break;
+        }
+        return result;
+    }
+
     let getSourceFileDecorators = function(srcFile: ts.SourceFile): void {
         window.ts.forEachChild(srcFile, (node: ts.Node) => {
             console.log(node)
+            // Kinds:
+            // 238 : ImportDeclaration
+            // 229 : ClassDeclaration
+            // 147 : Decorator
+            // 152 : Constructor
+            // 149 : PropertyDeclaration
+            // 151 : MethodDeclaration
+            triggerKeyboard(syntaxKindToNote(node.kind))
         });
     }
 
@@ -66,6 +91,7 @@ export class TodoComponent {
     masterGain.connect(context.destination);
 
     keyboard.keyUp = function(note: string, frequency: number) {
+      console.log(note)
         var oscillator = context.createOscillator();
         oscillator.type = 'square';
         oscillator.frequency.value = frequency;
@@ -102,10 +128,10 @@ export class TodoComponent {
       }, 100);
     }
 
-    setTimeout(() => {
+    /*setTimeout(() => {
         triggerKeyboard('C4')
     }, 2000);
     setTimeout(() => {
         triggerKeyboard('D4')
-    }, 3000);
+    }, 3000);*/
 }
