@@ -7,6 +7,7 @@ export default {
   dest: './build/scripts/app.js',
   format: 'cjs',
   sourceMap: true,
+  context: 'window',
   plugins: [
     rollupTypescript({
         typescript: require('typescript')

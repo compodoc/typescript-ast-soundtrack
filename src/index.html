@@ -8,16 +8,24 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <link rel="stylesheet" href="styles/app.css">
+        <link href="https://fonts.googleapis.com/css?family=Lato:400,700" rel="stylesheet">
     </head>
     <body>
         <div class="container">
               <div class="title">
                   <h3>TypeScript AST soundtrack</h3>
                   <span>
-                      Play sound for each node of the AST : variable (DO), function (RE), interface (MI), enum (FA), class (SOL), decorator (LA), accessor (SI)
+                      Play sound for each node of the AST :
+                      <br/>Octave 1 : variable (DO), function (RE), @input (MI), @output (FA), @HostBinding (SOL), @HostListener (LA), @ContentChild (SI)
+                      <br/>Octave 2 : @ContentChildren (DO), @ViewChild (RE), @ViewChildren (MI)
                   </span>
               </div>
               <div class="controls">
+                  <select id="anthem-selection">
+                      <option value="" selected>Select an anthem</option>
+                      <option value="belgium">Belgium national anthem</option>
+                      <option value="french">French national anthem</option>
+                  </select>
                   <button>Play</button>
               </div>
               <div class="keyboard-container">
@@ -28,8 +36,8 @@
               </div>
         </div>
 
-        <script src="libs/monaco-editor/min/vs/loader.js"></script>
-        <script src="libs/qwerty-hancock.min.js"></script>
+        <script src="node_modules/monaco-editor/min/vs/loader.js"></script>
+        <script src="node_modules/qwerty-hancock/dist/qwerty-hancock.min.js"></script>
         <script src="node_modules/typescript/lib/typescript.js"></script>
         <script src="scripts/app.js"></script>
     </body>
