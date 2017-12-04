@@ -22,8 +22,6 @@ export class TodoComponent {
   @Output()
   myEvent = new EventEmitter();
 
-  status: string;
-
   @HostBinding('class.valid')
   isValid;
 
@@ -43,6 +41,7 @@ export class TodoComponent {
 
     let syntaxKindToNote = (kind: number) => {
         let result;
+        console.log(kind);
         // Kinds:
         // 149 : PropertyDeclaration
         // 151 : MethodDeclaration
@@ -55,12 +54,6 @@ export class TodoComponent {
             case 151:
                 result = 'D4';
                 break;
-            case 152:
-                result = 'D4';
-                break;
-            case 229:
-                result = 'E4';
-                break;
         }
         return result;
     }
@@ -69,28 +62,53 @@ export class TodoComponent {
         if (classDeclaration.members && classDeclaration.members.length > 0) {
             classDeclaration.members.map(member => {
                 if (member.kind === 149 || member.kind === 151) {
-                    if (member.decorators && member.decorators.length === 1) {
-                        let note = '';
-                        switch (member.decorators[0].expression.expression.text) {
-                            case 'Input':
-                                note = 'F4'
-                                break;
-                            case 'Output':
-                                note = 'G4'
-                                break;
-                            case 'HostBinding':
-                                note = 'A4'
-                                break;
-                            case 'HostListener':
-                                note = 'B4'
-                                break;
+                    if (member.decorators && member.decorators.length >= 1) {
+                        let note = '',
+                            length;
+                        // 0 : length
+                        // 1 : Angular decorator
+                        if (member.decorators[0].expression.arguments.length > 0) {
+                            length = parseInt(member.decorators[0].expression.arguments[0].text);
+                        } else {
+                            length = 1;
                         }
-                        notes.push(note)
-                    } else {
-                        notes.push(syntaxKindToNote(member.kind))
+                        if (member.decorators.length > 1) {
+                            switch (member.decorators[1].expression.expression.text) {
+                                case 'Input':
+                                    note = 'E4'
+                                    break;
+                                case 'Output':
+                                    note = 'F4'
+                                    break;
+                                case 'HostBinding':
+                                    note = 'G4'
+                                    break;
+                                case 'HostListener':
+                                    note = 'A4'
+                                    break;
+                                case 'ContentChild':
+                                    note = 'B4'
+                                    break;
+                                case 'ContentChildren':
+                                    note = 'C5'
+                                    break;
+                                case 'ViewChild':
+                                    note = 'D5'
+                                    break;
+                                case 'ViewChildren':
+                                    note = 'E5'
+                                    break;
+                            }
+                        } else {
+                            note = syntaxKindToNote(member.kind);
+                        }
+                        notes.push({
+                            note: note,
+                            length: length,
+                            start: (<any>window).ts.getLineAndCharacterOfPosition(currentFile, member.pos).line,
+                            end: (<any>window).ts.getLineAndCharacterOfPosition(currentFile, member.name.end).line
+                        });
                     }
-                } else {
-                    notes.push(syntaxKindToNote(member.kind))
                 }
             });
         }
@@ -98,13 +116,24 @@ export class TodoComponent {
 
     let notes = [];
 
+    /*
+        Note length :
+        - 0 : very short 250
+        - 1 : short 500
+        - 2 : normal 750
+        - 3 : long 1000
+     */
+
+    let noteLengthInSeconds = (length) => {
+        return (length * 250) + 250;
+    }
+
     let getSourceFileDecorators = function(srcFile: ts.SourceFile): void {
         (<any>window).ts.forEachChild(srcFile, (node: ts.Node) => {
             console.log(node, node.kind)
             if (node.kind !== 238 &&
                 node.kind !== 207 &&
                 node.kind !== 1) {
-                notes.push(syntaxKindToNote(node.kind));
                 if (node.kind === 229) {
                     parseClass(node);
                 }
@@ -115,24 +144,34 @@ export class TodoComponent {
             len = notes.length;
         let loop = () => {
             if (i < len) {
-                triggerKeyboard(notes[i])
+                triggerKeyboard(notes[i].note, noteLengthInSeconds(notes[i].length));
+                editorDecorations = editor.deltaDecorations([], [
+                	{
+                        range: new monaco.Range(notes[i].start,1,notes[i].end,1),
+                        options: {
+                            isWholeLine: true,
+                            linesDecorationsClassName: 'lineDecoration'
+                        }}
+                ]);
                 setTimeout(() => {
+                    editorDecorations = editor.deltaDecorations(editorDecorations, []);
                     i++;
                     loop();
-                }, 250)
+                }, noteLengthInSeconds(notes[i].length))
             }
         };
 
         loop();
     }
 
-    let $btn = document.querySelector('button');
+    let $btn = document.querySelector('button'),
+        currentFile: ts.SourceFile;
 
     $btn.addEventListener('click', () => {
         notes = [];
-        let file: ts.SourceFile = (<any>window).ts.createSourceFile('demo.ts', editor.getValue(), 1, false);
-        console.log(file)
-        getSourceFileDecorators(file);
+        currentFile = (<any>window).ts.createSourceFile('demo.ts', editor.getValue(), 1, false);
+        console.log(currentFile)
+        getSourceFileDecorators(currentFile);
     });
 
     let $select = document.querySelector('#anthem-selection');
@@ -151,9 +190,15 @@ export class TodoComponent {
         hoverColour: '#3c3c3c'
     });
 
-    editor.deltaDecorations([], [
+    let editorDecorations;
+
+    /* = editor.deltaDecorations([], [
     	{ range: new monaco.Range(3,1,5,1), options: { isWholeLine: true, linesDecorationsClassName: 'lineDecoration' }}
     ]);
+
+    setTimeout(function() {
+        editorDecorations = editor.deltaDecorations(editorDecorations, []);
+    }, 2000);*/
 
     (<any>window).AudioContext = (<any>window).AudioContext || (<any>window).webkitAudioContext;
 
@@ -165,30 +210,30 @@ export class TodoComponent {
     masterGain.gain.value = 0.3;
     masterGain.connect(context.destination);
 
-    keyboard.keyUp = function(note: string, frequency: number) {
-        console.log(note);
+    keyboard.keyDown = function(note: string, frequency: number) {
         var oscillator = context.createOscillator();
         oscillator.type = 'sine';
         oscillator.frequency.value = frequency;
         oscillator.connect(masterGain);
         oscillator.start(0);
         nodes.push(oscillator);
-        setTimeout(() => {
-            var new_nodes = [];
-            for (var i = 0; i < nodes.length; i++) {
-                if (Math.round(nodes[i].frequency.value) === Math.round(frequency)) {
-                    nodes[i].stop(0);
-                    nodes[i].disconnect();
-                } else {
-                    new_nodes.push(nodes[i]);
-                }
-            }
-            nodes = new_nodes;
-        }, 150);
-
     };
 
-    let triggerKeyboard = function(key: string) {
+    keyboard.keyUp = function(note: string, frequency: number) {
+        console.log(note);
+        var new_nodes = [];
+        for (var i = 0; i < nodes.length; i++) {
+            if (Math.round(nodes[i].frequency.value) === Math.round(frequency)) {
+                nodes[i].stop(0);
+                nodes[i].disconnect();
+            } else {
+                new_nodes.push(nodes[i]);
+            }
+        }
+        nodes = new_nodes;
+    };
+
+    let triggerKeyboard = function(key: string, length) {
         document.querySelector(`#keyboard li[id="${key}"]`).dispatchEvent(new MouseEvent('mousedown', {
             view: window,
             bubbles: true,
@@ -200,6 +245,6 @@ export class TodoComponent {
                 bubbles: true,
                 cancelable: true
             }))
-        }, 100);
+        }, length);
     }
 }
