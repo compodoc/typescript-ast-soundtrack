@@ -41,7 +41,6 @@ export class TodoComponent {
 
     let syntaxKindToNote = (kind: number) => {
         let result;
-        console.log(kind);
         // Kinds:
         // 149 : PropertyDeclaration
         // 151 : MethodDeclaration
@@ -130,7 +129,6 @@ export class TodoComponent {
 
     let getSourceFileDecorators = function(srcFile: ts.SourceFile): void {
         (<any>window).ts.forEachChild(srcFile, (node: ts.Node) => {
-            console.log(node, node.kind)
             if (node.kind !== 238 &&
                 node.kind !== 207 &&
                 node.kind !== 1) {
@@ -139,7 +137,6 @@ export class TodoComponent {
                 }
             }
         });
-        console.log(notes);
         let i = 0,
             len = notes.length;
         let loop = () => {
@@ -170,14 +167,12 @@ export class TodoComponent {
     $btn.addEventListener('click', () => {
         notes = [];
         currentFile = (<any>window).ts.createSourceFile('demo.ts', editor.getValue(), 1, false);
-        console.log(currentFile)
         getSourceFileDecorators(currentFile);
     });
 
     let $select = document.querySelector('#anthem-selection');
 
     $select.addEventListener('change', (e) => {
-        console.log('select change: ', e.target.value);
         editor.setValue(ANTHEMS[e.target.value]);
     });
 
@@ -220,7 +215,6 @@ export class TodoComponent {
     };
 
     keyboard.keyUp = function(note: string, frequency: number) {
-        console.log(note);
         var new_nodes = [];
         for (var i = 0; i < nodes.length; i++) {
             if (Math.round(nodes[i].frequency.value) === Math.round(frequency)) {

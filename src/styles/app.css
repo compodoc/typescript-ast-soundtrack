@@ -50,16 +50,19 @@ body {
 }
 
 .controls select {
-    margin: 10px;
+    margin-bottom: 15px;
+    height: 35px;
 }
 .controls button {
   font-size: 20px;
   padding: 5px 15px;
+  height: 55px;
 }
 
 .keyboard-container {
   display: flex;
   justify-content: center;
+  height: 250px;
 }
 
 .editor-container {
